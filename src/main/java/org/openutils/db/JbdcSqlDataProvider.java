@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,27 +15,24 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.jdbc.Work;
 import org.openutils.map.CamelCaseHashMap;
 import org.openutils.map.CamelCasePolicy;
 
-import com.core.common.persistence.HibernateSessionFactory;
-import com.core.utils.ConnectionFactory;
-
-public class JbdcSqlProvider implements SqlProviderIfc
+public class JbdcSqlDataProvider implements SqlDataProvider
 {
 	private static final Logger log = Logger.getLogger(Exception.class);
 	private static final int ZERO = 0;
 
+	// @Inject
+	private Connection connection;
+	
 	public Collection<Map<?,?>> executeSelectingQuery(String sql, Map<String, Object> argumentMap) throws SQLException
 	{
-		Connection connection = ConnectionFactory.getInstance().getConnectionFromSession();
+		/*Connection connection = ConnectionFactory.getInstance().getConnectionFromSession();*/
 		if(connection == null)
 			throw new NullPointerException("Connection must not be null.");
 
-		CallableStatement statement = prepareStatement(connection, sql, argumentMap);
+		CallableStatement statement = prepareStatement(sql, argumentMap);
 		statement.execute();
 
 		ResultSet resultSet = statement.getResultSet();
@@ -64,7 +60,7 @@ public class JbdcSqlProvider implements SqlProviderIfc
 		return records;
 	}
 
-	private CallableStatement prepareStatement(Connection connection, String sql, Map<String, Object> argumentMap) throws SQLException
+	private CallableStatement prepareStatement(String sql, Map<String, Object> argumentMap) throws SQLException
 	{
 		List<String> parameters = getSqlParameters(sql);
 		sql = formatSqlParameters(sql, argumentMap.keySet() );
@@ -139,37 +135,10 @@ public class JbdcSqlProvider implements SqlProviderIfc
 		}
 	}
 
-	public void executeSql(final String sql) throws Exception
+	@Override
+	public void executeNonSelectingQuery(String sql) throws SQLException
 	{
-		Session session = null;
-		try 
-		{
-			session = HibernateSessionFactory.openSession();
-
-			Transaction tx = null;
-			tx = session.beginTransaction();
-			session.doWork(
-					new Work() {
-						public void execute(Connection connection) throws SQLException 
-						{ 
-							Statement statement = connection.createStatement();
-							statement.execute(sql);
-						}					
-					}
-					);
-			tx.commit();
-		}
-		catch(Exception e)
-		{
-			throw e;
-			//throw new EdiSqlException(EdiSqlException.QUERY_EXECUTION_FAILED, null, e);
-		}
-		finally
-		{
-			if(session != null)
-			{
-				//session.close();
-			}
-		}
+		// TODO Auto-generated method stub
+		
 	}
 }
