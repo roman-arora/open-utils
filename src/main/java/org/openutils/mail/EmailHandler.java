@@ -1,7 +1,6 @@
 package org.openutils.mail;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -18,8 +17,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * 
@@ -28,88 +27,40 @@ import org.apache.log4j.Logger;
  */
 public class EmailHandler
 {
+	private static final Log log = LogFactory.getLog("app." + EmailHandler.class.getName() );
+	
 	public static final String SUBJECT = "subject";
 	public static final String BODY = "body";
 	public static final String ATTACHMENT = "attachment";
 
-	private static final String CSV_DELIMITER = ",";
-
-	private static final Logger log = Logger.getLogger("app." + EmailHandler.class.getName() );
-
 	private String smtpAddress;
 	private String fromAddress;
+	private InternetAddress[] recipients;
+	
 	private Session session;
 
 	private String user;
 	private String password;
 
-	private InternetAddress[] recipients;
 	private boolean debug = true;
 
-	public EmailHandler(Configuration config) throws Exception
+	public EmailHandler(String fromAddress, String smtpAddress, String[] recipientAddresses, boolean doAuth) throws Exception
 	{
-		smtpAddress = config.getString(ReportingProperties.REPORTING_SMTP_HOST);
-		fromAddress = config.getString(ReportingProperties.REPORTING_FROM);
-
-		Boolean doAuth = config.getBoolean(ReportingProperties.REPORTING_AUTH);
-		session = getSession(doAuth);
-
-		String recipientsCsv = config.getString(ReportingProperties.REPORTING_RECIPIENTS);
-		if(recipientsCsv != null)
+		this.smtpAddress = smtpAddress;
+		this.fromAddress = fromAddress;
+		this.session = getSession(doAuth);
+		
+		this.recipients = new InternetAddress[recipientAddresses.length];
+		for(int i = 0; i < recipientAddresses.length; i++)
 		{
-			parseRecipients(recipientsCsv);
-		}
-	}
-
-	public EmailHandler(Properties sysProperties) throws Exception
-	{
-		smtpAddress = sysProperties.getProperty(ReportingProperties.REPORTING_SMTP_HOST);
-		fromAddress = sysProperties.getProperty(ReportingProperties.REPORTING_FROM);
-		user = sysProperties.getProperty(ReportingProperties.REPORTING_USER);
-		password = sysProperties.getProperty(ReportingProperties.REPORTING_PASS);
-
-		String authStr = sysProperties.getProperty(ReportingProperties.REPORTING_AUTH);
-		Boolean doAuth = new Boolean(authStr);
-		session = getSession(doAuth);
-
-		String recipientsCsv = sysProperties.getProperty(ReportingProperties.REPORTING_RECIPIENTS);
-		if(recipientsCsv != null)
-		{
-			parseRecipients(recipientsCsv);
-		}
-	}
-
-	public void parseRecipients(String recipientsCsv) throws Exception
-	{
-		String[] recipientAddrs = recipientsCsv.split(CSV_DELIMITER);
-		if(recipientAddrs.length == 0)
-			throw new IllegalArgumentException("Invalid recipient list");
-		else
-		{
-			log.info("Parsed " + recipientAddrs.length + " recipients.");	
-		}
-
-		recipients = new InternetAddress[recipientAddrs.length];
-		for(int i = 0; i < recipientAddrs.length; i++)
-		{
-			recipients[i] = new InternetAddress( recipientAddrs[i].trim() );	
-		}
-	}
-
-	public void setRecipients(List<? extends EmailRecipient> recipientList) throws Exception
-	{
-		this.recipients = new InternetAddress[recipientList.size()];
-
-		for(int i = 0; i < recipientList.size(); i++)
-		{
-			recipients[i] = new InternetAddress( recipientList.get(i).getAddress() );
+			this.recipients[i] = new InternetAddress( recipientAddresses[i].trim() );	
 		}
 	}
 
 	public void sendInfoMessage(String subject, String body, String fileName) throws MessagingException
 	{
 		log.info("Sending email.");
-
+		
 		MimeMessage msg = new MimeMessage(session);
 		msg.setFrom( new InternetAddress(fromAddress) );
 		msg.setRecipients(Message.RecipientType.TO, recipients);

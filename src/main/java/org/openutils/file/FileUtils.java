@@ -21,6 +21,7 @@ public class FileUtils
 {
 	public static final String WINDOWS_DRIVE_REGEX = "[A-Z]:\\\\(.)*";
 	private static final String NEW_LINE = System.getProperty("line.separator");
+	public static final String CSV_DELIMITER = ",";
 	private static int index = 0;
 	
 	public static boolean deleteDirectory(File path)
