@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openutils.map.CamelCaseHashMap;
-import org.openutils.map.CamelCasePolicy;
+import org.openutils.collect.CamelCaseHashMap;
+import org.openutils.collect.CamelCasePolicy;
 
 public class JbdcSqlDataProvider implements SqlDataProvider
 {
@@ -25,6 +25,12 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 
 	// @Inject
 	private Connection connection;
+	private CamelCasePolicy casePolicy;
+	
+	public JdbcSqlDataProvider()
+	{
+		
+	}
 	
 	public Collection<Map<?,?>> executeSelectingQuery(String sql, Map<String, Object> argumentMap) throws SQLException
 	{

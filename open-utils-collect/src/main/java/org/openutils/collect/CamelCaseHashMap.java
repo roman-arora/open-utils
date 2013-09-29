@@ -1,4 +1,4 @@
-package org.openutils.map;
+package org.openutils.collect;
 
 import java.util.HashMap;
 
