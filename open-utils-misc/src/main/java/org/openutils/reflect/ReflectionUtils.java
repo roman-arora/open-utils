@@ -1,13 +1,14 @@
-package org.openutils;
+package org.openutils.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ReflectionUtils
 {
-	private static final Logger log = Logger.getLogger(  ReflectionUtils.class.getName() );
+	private static final Log log = LogFactory.getLog(  ReflectionUtils.class.getName() );
 	
 	public static Field getDeclaredField(Class<?> klass, String fieldName)
 	{

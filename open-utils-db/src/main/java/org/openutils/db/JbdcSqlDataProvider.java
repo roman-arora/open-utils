@@ -14,13 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openutils.collect.CamelCaseHashMap;
 import org.openutils.collect.CamelCasePolicy;
 
 public class JbdcSqlDataProvider implements SqlDataProvider
 {
-	private static final Logger log = Logger.getLogger(Exception.class);
+	private static final Log log = LogFactory.getLog(Exception.class);
 	private static final int ZERO = 0;
 
 	// @Inject
