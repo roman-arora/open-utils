@@ -27,7 +27,7 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 	private Connection connection;
 	private CamelCasePolicy casePolicy;
 	
-	public JdbcSqlDataProvider()
+	public JbdcSqlDataProvider()
 	{
 		
 	}

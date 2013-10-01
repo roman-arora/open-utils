@@ -18,7 +18,8 @@
 	<modules>
 		<module>open-utils-db</module>
     <module>open-utils-collect</module>
-  </modules>
+    <module>open-utils-mail</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -52,11 +53,6 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.5</version>
 		</dependency>
 	</dependencies>
 
