@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 
 import org.junit.Assert;
 import org.openutils.db.JdbcSqlDataProvider;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -13,13 +14,46 @@ import org.testng.annotations.Test;
  */
 public class JdbcSqlDataProviderTest
 {
-	// TODO: add test for testExecuteSelectingQuery that takes query & map of
-	// parameters
+	// I could make connection & teardown as before / after test methods, do it!!
 
-	@Test
-	public void testExecuteSelectingQuery() throws Exception
+	@BeforeTest
+	public void setUp() throws Exception
 	{
 		Class.forName("org.h2.Driver");
+	}
+
+	@Test
+	public void executeSelectingQueryWithParams() throws Exception {
+
+		Connection conn = null;
+		try
+		{
+			conn = DriverManager.getConnection("jdbc:h2:~/test");
+
+			JdbcSqlDataProvider provider = new JdbcSqlDataProvider(conn);
+			provider.executeNonSelectingQuery("CREATE TABLE testTable");
+
+			//Assert.assertNotNull(rs.next());
+		}
+		finally
+		{
+			if(conn != null)
+			{
+				try
+				{
+					conn.close();
+				}
+				catch(Exception e)
+				{
+					// Ignore
+				}
+			}
+		}
+	}
+
+	@Test
+	public void executeSelectingQuery() throws Exception
+	{
 		Connection conn = null;
 		try
 		{
