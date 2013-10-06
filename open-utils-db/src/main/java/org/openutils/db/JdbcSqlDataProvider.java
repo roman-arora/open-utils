@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,7 @@ public class JdbcSqlDataProvider implements SqlDataProvider
 
 	@Inject
 	private Connection connection;
-	
+
 	private CamelCasePolicy casePolicy;
 
 	public JdbcSqlDataProvider(Connection connection)
@@ -37,27 +38,36 @@ public class JdbcSqlDataProvider implements SqlDataProvider
 		this.casePolicy = CamelCasePolicy.START_UPPER_CASE;
 	}
 
-	/*
-	if(connection == null)
-		throw new NullPointerException("Connection must not be null.");
-	*/
-	
-	public Collection<Map<?, ?>> executeSelectingQuery(String sql, Map<String, Object> parameterMap) throws SQLException
+	public ResultSet executeSelectingQuery(String query) throws SQLException
 	{
-		CallableStatement statement = null;
-		if(parameterMap != null)
-		{
-			statement =  prepareStatement(sql, parameterMap);
-		}
-		else 
-		{
-			//TODO: Implement this functionality
-			throw new UnsupportedOperationException();
-		}
+		Statement statement = connection.createStatement();
+		return statement.executeQuery(query);
+	}
+
+	@Override
+	public Collection<Map<?, ?>> executeSelectingQuery(String sql, Map<String, Object> parameterMap)
+		throws SQLException
+	{
+		if(parameterMap == null)
+			throw new IllegalArgumentException("Parameters must be provided.");
+
+		CallableStatement statement = prepareStatement(sql, parameterMap);
 		statement.execute();
 
+		return resultSetToMap(statement.getResultSet());
+	}
+
+	/**
+	 * Converts a ResultSet to a Collection of Map objects.
+	 * 
+	 * @param resultSet
+	 * @return
+	 * @throws SQLException
+	 */
+	private Collection<Map<?, ?>> resultSetToMap(ResultSet resultSet) throws SQLException
+	{
 		Collection<Map<?, ?>> records = new LinkedList<Map<?, ?>>();
-		ResultSet resultSet = statement.getResultSet();
+
 		while(resultSet.next())
 		{
 			Map<String, Object> valueMap = new CamelCaseHashMap<Object>(casePolicy);
@@ -82,7 +92,7 @@ public class JdbcSqlDataProvider implements SqlDataProvider
 
 	private CallableStatement prepareStatement(String sql, Map<String, Object> parameterMap) throws SQLException
 	{
-		List<String>parameters = getSqlParameters(sql);
+		List<String> parameters = getSqlParameters(sql);
 		sql = formatSqlParameters(sql, parameterMap.keySet());
 
 		CallableStatement statement = connection.prepareCall(sql);
