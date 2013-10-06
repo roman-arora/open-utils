@@ -14,40 +14,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openutils.collect.CamelCaseHashMap;
 import org.openutils.collect.CamelCasePolicy;
 
-public class JbdcSqlDataProvider implements SqlDataProvider
+public class JdbcSqlDataProvider implements SqlDataProvider
 {
 	private static final Log log = LogFactory.getLog(Exception.class);
 	private static final int ZERO = 0;
 
-	// @Inject
+	@Inject
 	private Connection connection;
+	
 	private CamelCasePolicy casePolicy;
-	
-	public JbdcSqlDataProvider()
-	{
-		
-	}
-	
-	public Collection<Map<?,?>> executeSelectingQuery(String sql, Map<String, Object> argumentMap) throws SQLException
-	{
-		/*Connection connection = ConnectionFactory.getInstance().getConnectionFromSession();*/
-		if(connection == null)
-			throw new NullPointerException("Connection must not be null.");
 
-		CallableStatement statement = prepareStatement(sql, argumentMap);
+	public JdbcSqlDataProvider(Connection connection)
+	{
+		this.connection = connection;
+		this.casePolicy = CamelCasePolicy.START_UPPER_CASE;
+	}
+
+	/*
+	if(connection == null)
+		throw new NullPointerException("Connection must not be null.");
+	*/
+	
+	public Collection<Map<?, ?>> executeSelectingQuery(String sql, Map<String, Object> parameterMap) throws SQLException
+	{
+		CallableStatement statement = null;
+		if(parameterMap != null)
+		{
+			statement =  prepareStatement(sql, parameterMap);
+		}
+		else 
+		{
+			//TODO: Implement this functionality
+			throw new UnsupportedOperationException();
+		}
 		statement.execute();
 
+		Collection<Map<?, ?>> records = new LinkedList<Map<?, ?>>();
 		ResultSet resultSet = statement.getResultSet();
-
-		Collection<Map<?,?>> records = new LinkedList<Map<?,?>>();
-		while( resultSet.next() )
+		while(resultSet.next())
 		{
-			Map<String, Object> valueMap = new CamelCaseHashMap<Object>(CamelCasePolicy.START_UPPER_CASE);
+			Map<String, Object> valueMap = new CamelCaseHashMap<Object>(casePolicy);
 
 			// Get result set meta data
 			ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -67,10 +80,10 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 		return records;
 	}
 
-	private CallableStatement prepareStatement(String sql, Map<String, Object> argumentMap) throws SQLException
+	private CallableStatement prepareStatement(String sql, Map<String, Object> parameterMap) throws SQLException
 	{
-		List<String> parameters = getSqlParameters(sql);
-		sql = formatSqlParameters(sql, argumentMap.keySet() );
+		List<String>parameters = getSqlParameters(sql);
+		sql = formatSqlParameters(sql, parameterMap.keySet());
 
 		CallableStatement statement = connection.prepareCall(sql);
 
@@ -78,9 +91,9 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 		{
 			for(int i = ZERO; i < parameters.size(); i++)
 			{
-				Object value = argumentMap.get( parameters.get(i) ) ;
+				Object value = parameterMap.get(parameters.get(i));
 				if(value == null)
-					log.warn("Callable statement parameter value is null");
+					log.warn("Callable statement parameter value is null.");
 
 				populateStatementParameter(statement, i + 1, value);
 			}
@@ -99,15 +112,16 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 		return sql;
 	}
 
+	/* Get SQL query parameter names */
 	private List<String> getSqlParameters(String sql)
 	{
-		String arguments = sql.substring( sql.indexOf("(") + 1, sql.indexOf(")") );
+		String arguments = sql.substring(sql.indexOf("(") + 1, sql.indexOf(")"));
 		String[] sqlParams = arguments.split(",");
 
 		List<String> params = new ArrayList<String>();
 		for(String arg : sqlParams)
 		{
-			params.add( arg.substring(1) );
+			params.add(arg.substring(1));
 		}
 
 		return params;
@@ -129,7 +143,7 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 		}
 		else if(value instanceof Date)
 		{
-			statement.setTimestamp(  i, new Timestamp( ((Date)value).getTime() )  );
+			statement.setTimestamp(i, new Timestamp(((Date) value).getTime()));
 		}
 		else if(value == null)
 		{
@@ -138,7 +152,7 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 		else
 		{
 			log.warn("Unrecognize parameter type!");
-			statement.setString( i, value.toString() );
+			statement.setString(i, value.toString());
 		}
 	}
 
@@ -146,6 +160,5 @@ public class JbdcSqlDataProvider implements SqlDataProvider
 	public void executeNonSelectingQuery(String sql) throws SQLException
 	{
 		// TODO Auto-generated method stub
-		
 	}
 }
