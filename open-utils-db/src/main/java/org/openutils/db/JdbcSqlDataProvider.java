@@ -26,14 +26,15 @@ public class JdbcSqlDataProvider implements SqlDataProvider
 {
 	private static final Log log = LogFactory.getLog(Exception.class);
 
-	@Inject
 	private Connection connection;
-
+	private SqlStatementBuilder statementBuilder;
 	private CamelCasePolicy casePolicy;
 
+	@Inject
 	public JdbcSqlDataProvider(Connection connection)
 	{
 		this.connection = connection;
+		this.statementBuilder = new SqlStatementBuilder(connection, null);
 		this.casePolicy = CamelCasePolicy.START_UPPER_CASE;
 	}
 
@@ -50,7 +51,7 @@ public class JdbcSqlDataProvider implements SqlDataProvider
 			throw new IllegalArgumentException("Parameters must be provided.");
 		}
 
-		CallableStatement statement = SqlStatementBuilder.prepareStatement(connection, sql, parameterMap);
+		CallableStatement statement = statementBuilder.prepareStatement(sql, parameterMap);
 		statement.execute();
 
 		return resultSetToMap(statement.getResultSet());
