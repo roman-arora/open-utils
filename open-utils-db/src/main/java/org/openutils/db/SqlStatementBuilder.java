@@ -3,6 +3,7 @@ package org.openutils.db;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +48,11 @@ public class SqlStatementBuilder
 	public CallableStatement prepareStatement(String sql, Map<String, Object> parameterMap) throws SQLException
 	{
 		List<String> parameters = getSqlParameters(sql);
+		return prepareStatement(sql, parameters, parameterMap);
+	}
+
+	public CallableStatement prepareStatement(String sql, List<String> parameters, Map<String, Object> parameterMap) throws SQLException
+	{
 		sql = formatSqlParameters(sql, parameterMap.keySet());
 
 		CallableStatement statement = connection.prepareCall(sql);
