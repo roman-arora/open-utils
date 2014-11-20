@@ -19,8 +19,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openutils.collect.CamelCaseHashMap;
-import org.openutils.collect.CamelCasePolicy;
+import org.openutils.collections.CamelCaseHashMap;
+import org.openutils.collections.CamelCasePolicy;
 
 public class JdbcSqlDataProvider implements SqlDataProvider
 {

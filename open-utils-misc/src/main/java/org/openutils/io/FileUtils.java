@@ -1,4 +1,4 @@
-package org.openutils.file;
+package org.openutils.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +16,9 @@ import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-
+/**
+ * File manipulation related helper functions
+ */
 public class FileUtils
 {
 	public static final String WINDOWS_DRIVE_REGEX = "[A-Z]:\\\\(.)*";

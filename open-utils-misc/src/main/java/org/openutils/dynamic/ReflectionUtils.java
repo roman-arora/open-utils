@@ -1,4 +1,4 @@
-package org.openutils.reflect;
+package org.openutils.dynamic;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
